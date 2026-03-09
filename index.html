@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dorosh Community Tap</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background: #000; color: white; text-align: center;
+            font-family: 'Segoe UI', sans-serif; margin: 0; display: flex;
+            flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+        }
+        #score { font-size: 48px; font-weight: bold; margin-bottom: 10px; color: #f1c40f; }
+        .coin {
+            width: 220px; height: 220px; background: radial-gradient(circle, #f1c40f, #d4ac0d);
+            border-radius: 50%; box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);
+            display: flex; align-items: center; justify-content: center; font-size: 80px;
+            cursor: pointer; user-select: none; transition: transform 0.05s;
+        }
+        .coin:active { transform: scale(0.92); }
+    </style>
+</head>
+<body>
+    <div id="score">0</div>
+    <div class="coin" id="tapBtn">🪙</div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const scoreDisplay = document.getElementById('score');
+        const tapBtn = document.getElementById('tapBtn');
+
+        // Завантажуємо збережений рахунок з пам'яті браузера
+        let score = parseInt(localStorage.getItem('userScore')) || 0;
+        scoreDisplay.innerText = score;
+
+        tg.expand();
+
+        tapBtn.onclick = () => {
+            score++;
+            scoreDisplay.innerText = score;
+            localStorage.setItem('userScore', score); // Зберігаємо локально
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+        };
+    </script>
+</body>
+</html>
