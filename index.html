@@ -10,41 +10,77 @@
             background: #000; color: white; text-align: center;
             font-family: 'Segoe UI', sans-serif; margin: 0; display: flex;
             flex-direction: column; align-items: center; justify-content: center; height: 100vh;
+            overflow: hidden; /* Забороняє скрол */
+            user-select: none; /* Забороняє виділення тексту */
+            -webkit-tap-highlight-color: transparent; /* Прибирає синій квадрат на Android/iOS */
         }
-        #score { font-size: 48px; font-weight: bold; margin-bottom: 10px; color: #f1c40f; }
+        #score { font-size: 56px; font-weight: bold; margin-bottom: 20px; color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+        
+        .coin-container { position: relative; }
+
         .coin {
-            width: 220px; height: 220px; background: radial-gradient(circle, #f1c40f, #d4ac0d);
-            border-radius: 50%; box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);
-            display: flex; align-items: center; justify-content: center; font-size: 80px;
-            cursor: pointer; user-select: none; transition: transform 0.05s;
+            width: 240px; height: 240px; background: radial-gradient(circle, #f1c40f, #d4ac0d);
+            border-radius: 50%; box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);
+            display: flex; align-items: center; justify-content: center; font-size: 90px;
+            cursor: pointer; transition: transform 0.05s ease;
+            touch-action: manipulation; /* Покращує відгук на тапи */
         }
-        .coin:active { transform: scale(0.92); }
+        
+        .coin:active { transform: scale(0.95); }
+
+        /* Анімація цифри +1 */
+        .plus-one {
+            position: absolute; color: #f1c40f; font-size: 32px; font-weight: bold;
+            pointer-events: none; animation: floatUp 0.6s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-100px); }
+        }
     </style>
 </head>
 <body>
     <div id="score">0</div>
-    <div class="coin" id="tapBtn">🪙</div>
+    <div class="coin-container">
+        <div class="coin" id="tapBtn">🪙</div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const scoreDisplay = document.getElementById('score');
         const tapBtn = document.getElementById('tapBtn');
 
-        // Завантажуємо збережений рахунок з пам'яті браузера
         let score = parseInt(localStorage.getItem('userScore')) || 0;
         scoreDisplay.innerText = score;
 
         tg.expand();
+        tg.enableClosingConfirmation(); // Попередження при закритті
 
-        tapBtn.onclick = () => {
+        tapBtn.addEventListener('pointerdown', (e) => {
             score++;
             scoreDisplay.innerText = score;
-            localStorage.setItem('userScore', score); // Зберігаємо локально
+            localStorage.setItem('userScore', score);
             
+            // Вібровідгук
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred('medium');
             }
-        };
+
+            // Створюємо цифру +1
+            createPlusOne(e.clientX, e.clientY);
+        });
+
+        function createPlusOne(x, y) {
+            const el = document.createElement('div');
+            el.innerText = '+1';
+            el.className = 'plus-one';
+            el.style.left = `${x - 20}px`;
+            el.style.top = `${y - 50}px`;
+            document.body.appendChild(el);
+
+            setTimeout(() => { el.remove(); }, 600);
+        }
     </script>
 </body>
 </html>
